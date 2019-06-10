@@ -12,13 +12,9 @@ import androidx.cardview.widget.CardView
 import com.muddzdev.styleabletoast.StyleableToast
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.inputmethod.InputMethodManager
-import com.tadreik.emoji.MyVariables.clickValue
 import com.tadreik.emoji.MyVariables.levelUp1
-import com.tadreik.emoji.MyVariables.maxXp
-import com.tadreik.emoji.MyVariables.multiplier
 import com.tadreik.emoji.MyVariables.multiplier2
 import com.tadreik.emoji.MyVariables.player
-import com.tadreik.emoji.MyVariables.xp
 
 
 class MainActivity : AppCompatActivity() {
@@ -74,10 +70,10 @@ class MainActivity : AppCompatActivity() {
             editor.putInt("numberofpurchases", player.numberOfPurchases)
             editor.putInt("totalclicks", player.totalClicks)
             editor.putInt("creditlimit", player.creditLimit)
-            editor.putFloat("multiplier", multiplier)
-            editor.putFloat("clickvalue", clickValue)
+            editor.putInt("multiplier", player.multiplier)
+            editor.putInt("clickvalue", player.clickValue)
             editor.putInt("multiplierprice", multiplier2.price)
-            editor.putInt("xp", xp)
+            editor.putInt("xp", player.xp)
             editor.apply()
         }
 
@@ -89,11 +85,11 @@ class MainActivity : AppCompatActivity() {
             val savedMoneyEarned = sharedPref.getInt("moneyearned",player.moneyEarned)
             val savedPurchases = sharedPref.getInt("numberofpurchases",player.numberOfPurchases)
             val savedTotalClicks = sharedPref.getInt("totalclicks",player.totalClicks)
-            val savedMultiplier = sharedPref.getFloat("multiplier", multiplier)
-            val savedClickValue = sharedPref.getFloat("clickvalue", clickValue)
+            val savedMultiplier = sharedPref.getInt("multiplier", player.multiplier)
+            val savedClickValue = sharedPref.getInt("clickvalue", player.clickValue)
             val savedMultiplierPrice = sharedPref.getInt("multiplierprice", multiplier2.price)
             val savedCreditLimit = sharedPref.getInt("creditlimit", player.creditLimit)
-            val savedXp = sharedPref.getInt("xp", xp)
+            val savedXp = sharedPref.getInt("xp", player.xp)
             player.money = savedMoney
             player.credit = savedCredit
             player.level = savedLevel
@@ -103,9 +99,9 @@ class MainActivity : AppCompatActivity() {
             player.totalClicks = savedTotalClicks
             multiplier2.price = savedMultiplierPrice
             player.creditLimit = savedCreditLimit
-            xp = savedXp
-            multiplier = savedMultiplier
-            clickValue = savedClickValue
+            player.xp = savedXp
+            player.multiplier = savedMultiplier
+            player.clickValue = savedClickValue
         }
 
         fun checkOnLevel() {
@@ -123,7 +119,7 @@ class MainActivity : AppCompatActivity() {
 
 
         fun updateText() {
-            multipliertext.text = "Multiplier: ${multiplier}x"
+            multipliertext.text = "Multiplier: ${player.multiplier}x"
             cashView.text = "${player.money}"
             levelText.text = "Level: ${player.level}"
 
@@ -137,19 +133,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun levelUpComplete() {
-            xp = 0
-            xpBar.progress = xp
+            player.xp = 0
+            xpBar.progress = player.xp
             player.level += 1
             StyleableToast.makeText(this, "Level Up!", R.style.mytoast).show()
         }
 
         fun checkOnXp() {
-            if (xp < maxXp) {
-                xp += 1
-                xpBar.progress = xp
+            if (player.xp < player.maxXp) {
+                player.xp += 1
+                xpBar.progress = player.xp
             }
-            if (xp == maxXp) {
-                xpBar.progress = xp
+            if (player.xp == player.maxXp) {
+                xpBar.progress = player.xp
                 levelUpComplete()
             }
         }
@@ -162,10 +158,10 @@ class MainActivity : AppCompatActivity() {
             player.numberOfPurchases = 0
             player.totalClicks = 0
             multiplier2.price = 500
-            multiplier = 1.0f
-            clickValue = 1.0f
-            xp = 0
-            xpBar!!.progress = xp
+            player.multiplier = 1
+            player.clickValue = 1
+            player.xp = 0
+            xpBar!!.progress = player.xp
             updateText()
             checkOnLevel()
             checkOnMoney()
@@ -193,8 +189,8 @@ class MainActivity : AppCompatActivity() {
 
 
         fun onTouchEmoji() {
-            player.money += (clickValue * multiplier).toInt()
-            player.moneyEarned += (clickValue * multiplier).toInt()
+            player.money += (player.clickValue * player.multiplier)
+            player.moneyEarned += (player.clickValue * player.multiplier)
             player.totalClicks += 1
             checkOnXp()
             updateText()
@@ -204,7 +200,7 @@ class MainActivity : AppCompatActivity() {
 
         multiplier2Item.setOnClickListener {
             if (player.money >= multiplier2.price && player.level > 1) {
-                multiplier += .2f
+                player.multiplier += 1
                 player.moneySpent += multiplier2.price
                 player.money -= multiplier2.price
                 multiplier2.price += 500
@@ -240,7 +236,7 @@ class MainActivity : AppCompatActivity() {
         loadStats()
         updateText()
         checkOnLevel()
-        xpBar!!.progress = xp
+        xpBar!!.progress = player.xp
     }
 
     override fun onResume() {
