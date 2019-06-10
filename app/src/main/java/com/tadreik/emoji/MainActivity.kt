@@ -1,8 +1,11 @@
 package com.tadreik.emoji
 
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -12,6 +15,8 @@ import androidx.cardview.widget.CardView
 import com.muddzdev.styleabletoast.StyleableToast
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.inputmethod.InputMethodManager
+import com.daimajia.androidanimations.library.Techniques
+import com.daimajia.androidanimations.library.YoYo
 import com.tadreik.emoji.MyVariables.levelUp1
 import com.tadreik.emoji.MyVariables.multiplier2
 import com.tadreik.emoji.MyVariables.player
@@ -28,6 +33,14 @@ class MainActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
     }
 
+    private fun startCountAnimation(start : Int, end: Int) {
+        val animator = ValueAnimator.ofInt(start, end)
+        animator.duration = 1000
+        animator.addUpdateListener { animation -> cash_view.text = animation.animatedValue.toString() }
+        animator.start()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -173,30 +186,43 @@ class MainActivity : AppCompatActivity() {
         }
 
         cheatbutton.setOnClickListener {
+
             if(cheatbox.length() > 1) {
                 val value = cheatbox.text.toString()
                 val finalVal = Integer.parseInt(value)
-                player.money += finalVal
-                updateText()
-                checkOnMoney()
-                mgr.hideSoftInputFromWindow(cheatbox.windowToken, 0)
+                if((player.money >= player.maxCash) || (player.money < 0) || (player.money + finalVal > player.maxCash)) {
+                    player.money = player.maxCash
+                    updateText()
+                    StyleableToast.makeText(this, "You maxed out your money", R.style.mytoast).show()
+                } else {
+                    mgr.hideSoftInputFromWindow(cheatbox.windowToken, 0)
+                    startCountAnimation(player.money, player.money + finalVal)
+                    player.money += finalVal
+                    checkOnMoney()
+                }
             } else {
                 StyleableToast.makeText(this, "Too small", R.style.mytoast).show()
                 mgr.hideSoftInputFromWindow(cheatbox.windowToken, 0)
             }
-
         }
 
 
         fun onTouchEmoji() {
-            player.money += (player.clickValue * player.multiplier)
-            player.moneyEarned += (player.clickValue * player.multiplier)
-            player.totalClicks += 1
+            if(player.money >= player.maxCash || player.money < 0) {
+                player.money = player.maxCash
+                StyleableToast.makeText(this, "You maxed out your money", R.style.mytoast).show()
+            } else {
+                player.money += (player.clickValue * player.multiplier)
+                player.moneyEarned += (player.clickValue * player.multiplier)
+                player.totalClicks += 1
+            }
+
             checkOnXp()
             updateText()
             checkOnMoney()
             save()
         }
+
 
         multiplier2Item.setOnClickListener {
             if (player.money >= multiplier2.price && player.level > 1) {
@@ -230,9 +256,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        faceImage.setOnClickListener {
-            onTouchEmoji()
+        medalImage.setOnClickListener {
+            YoYo.with(Techniques.Swing)
+                .duration(800)
+                .repeat(0)
+                .playOn(findViewById(R.id.medalImage))
         }
+
+        faceImage.setOnTouchListener { v, event ->
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    YoYo.with(Techniques.Pulse)
+                        .duration(120)
+                        .repeat(0)
+                        .playOn(findViewById(R.id.faceImage))
+                    onTouchEmoji()
+
+                }
+            }
+            v?.onTouchEvent(event) ?: true
+        }
+
         loadStats()
         updateText()
         checkOnLevel()
@@ -244,7 +288,6 @@ class MainActivity : AppCompatActivity() {
         hideSystemUi()
     }
 
-
     override fun onRestart() {
         super.onRestart()
         hideSystemUi()
@@ -255,4 +298,3 @@ class MainActivity : AppCompatActivity() {
         hideSystemUi()
     }
 }
-  
