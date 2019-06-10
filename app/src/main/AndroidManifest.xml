@@ -18,6 +18,7 @@
         </activity>
         <activity android:name=".StatsActivity"/>
         <activity android:name=".HelpActivity"/>
+        <meta-data android:name="preloaded_fonts" android:resource="@array/preloaded_fonts"/>
     </application>
 
 </manifest>

@@ -10,14 +10,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import com.muddzdev.styleabletoast.StyleableToast
+import kotlinx.android.synthetic.main.activity_main.*
+import android.view.inputmethod.InputMethodManager
 import com.tadreik.emoji.MyVariables.clickValue
+import com.tadreik.emoji.MyVariables.levelUp1
 import com.tadreik.emoji.MyVariables.maxXp
 import com.tadreik.emoji.MyVariables.multiplier
 import com.tadreik.emoji.MyVariables.multiplier2
 import com.tadreik.emoji.MyVariables.player
 import com.tadreik.emoji.MyVariables.xp
-import kotlinx.android.synthetic.main.activity_main.*
-import android.view.inputmethod.InputMethodManager
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,7 +40,8 @@ class MainActivity : AppCompatActivity() {
 
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val editor = sharedPref.edit()
-        val moneyView = findViewById<TextView>(R.id.money_view)
+        val cashView = findViewById<TextView>(R.id.cash_view)
+        val creditView = findViewById<TextView>(R.id.cash_view)
         val multipliertext = findViewById<TextView>(R.id.multipliertext)
         val faceImage = findViewById<ImageView>(R.id.faceImage)
         val xpBar = findViewById<ProgressBar>(R.id.xpBar)
@@ -65,19 +67,23 @@ class MainActivity : AppCompatActivity() {
 
         fun save() {
             editor.putInt("money", player.money)
+            editor.putInt("credit", player.credit)
             editor.putInt("level", player.level)
             editor.putInt("moneyspent", player.moneySpent)
             editor.putInt("moneyearned", player.moneyEarned)
             editor.putInt("numberofpurchases", player.numberOfPurchases)
             editor.putInt("totalclicks", player.totalClicks)
+            editor.putInt("creditlimit", player.creditLimit)
             editor.putFloat("multiplier", multiplier)
             editor.putFloat("clickvalue", clickValue)
+            editor.putInt("multiplierprice", multiplier2.price)
             editor.putInt("xp", xp)
             editor.apply()
         }
 
         fun loadStats() {
             val savedMoney = sharedPref.getInt("money", player.money)
+            val savedCredit = sharedPref.getInt("credit", player.credit)
             val savedLevel = sharedPref.getInt("level", player.level)
             val savedMoneySpent = sharedPref.getInt("moneyspent", player.moneySpent)
             val savedMoneyEarned = sharedPref.getInt("moneyearned",player.moneyEarned)
@@ -85,13 +91,18 @@ class MainActivity : AppCompatActivity() {
             val savedTotalClicks = sharedPref.getInt("totalclicks",player.totalClicks)
             val savedMultiplier = sharedPref.getFloat("multiplier", multiplier)
             val savedClickValue = sharedPref.getFloat("clickvalue", clickValue)
+            val savedMultiplierPrice = sharedPref.getInt("multiplierprice", multiplier2.price)
+            val savedCreditLimit = sharedPref.getInt("creditlimit", player.creditLimit)
             val savedXp = sharedPref.getInt("xp", xp)
             player.money = savedMoney
+            player.credit = savedCredit
             player.level = savedLevel
             player.moneySpent = savedMoneySpent
             player.moneyEarned = savedMoneyEarned
             player.numberOfPurchases = savedPurchases
             player.totalClicks = savedTotalClicks
+            multiplier2.price = savedMultiplierPrice
+            player.creditLimit = savedCreditLimit
             xp = savedXp
             multiplier = savedMultiplier
             clickValue = savedClickValue
@@ -113,14 +124,14 @@ class MainActivity : AppCompatActivity() {
 
         fun updateText() {
             multipliertext.text = "Multiplier: ${multiplier}x"
-            moneyView.text = "${player.money}"
+            cashView.text = "${player.money}"
             levelText.text = "Level: ${player.level}"
 
-            multiplier2Name.text = MyVariables.multiplier2.name
-            multiplier2Price.text = "${MyVariables.multiplier2.price}"
+            multiplier2Name.text = multiplier2.name
+            multiplier2Price.text = "${multiplier2.price}"
 
-            levelUp1Name.text = MyVariables.levelUp1.name
-            levelUp1Price.text = "${MyVariables.levelUp1.price}"
+            levelUp1Name.text = levelUp1.name
+            levelUp1Price.text = "${levelUp1.price}"
 
             checkOnMoney()
         }
@@ -172,8 +183,10 @@ class MainActivity : AppCompatActivity() {
                 player.money += finalVal
                 updateText()
                 checkOnMoney()
+                mgr.hideSoftInputFromWindow(cheatbox.windowToken, 0)
             } else {
                 StyleableToast.makeText(this, "Too small", R.style.mytoast).show()
+                mgr.hideSoftInputFromWindow(cheatbox.windowToken, 0)
             }
 
         }
@@ -190,32 +203,32 @@ class MainActivity : AppCompatActivity() {
         }
 
         multiplier2Item.setOnClickListener {
-            if (player.money >= MyVariables.multiplier2.price && player.level > 1) {
+            if (player.money >= multiplier2.price && player.level > 1) {
                 multiplier += .2f
-                player.moneySpent += MyVariables.multiplier2.price
-                player.money -= MyVariables.multiplier2.price
-                MyVariables.multiplier2.price += 500
+                player.moneySpent += multiplier2.price
+                player.money -= multiplier2.price
+                multiplier2.price += 500
                 player.numberOfPurchases += 1
                 save()
                 updateText()
             } else if (player.level < 2) {
-                StyleableToast.makeText(this, "Level ${MyVariables.multiplier2.levelRequired} Required", R.style.mytoast).show()
+                StyleableToast.makeText(this, "Level ${multiplier2.levelRequired} Required", R.style.mytoast).show()
             } else {
                 StyleableToast.makeText(this, "Not enough money", R.style.mytoast).show()
             }
         }
 
         levelUp1Item.setOnClickListener {
-            if (player.money >= MyVariables.levelUp1.price && player.level > 9) {
-                player.moneySpent += MyVariables.levelUp1.price
-                player.money -= MyVariables.levelUp1.price
-                MyVariables.levelUp1.price += 5000
+            if (player.money >= levelUp1.price && player.level > 9) {
+                player.moneySpent += levelUp1.price
+                player.money -= levelUp1.price
+                levelUp1.price += 5000
                 player.numberOfPurchases += 1
                 player.level += 1
                 save()
                 updateText()
             } else if (player.level < 10) {
-                StyleableToast.makeText(this, "Level ${MyVariables.levelUp1.levelRequired} Required", R.style.mytoast).show()
+                StyleableToast.makeText(this, "Level ${levelUp1.levelRequired} Required", R.style.mytoast).show()
             } else {
                 StyleableToast.makeText(this, "Not enough money", R.style.mytoast).show()
             }
