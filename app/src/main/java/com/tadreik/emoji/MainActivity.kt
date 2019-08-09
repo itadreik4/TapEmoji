@@ -91,30 +91,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun loadStats() {
-            val savedMoney = sharedPref.getInt("money", player.money)
-            val savedCredit = sharedPref.getInt("credit", player.credit)
-            val savedLevel = sharedPref.getInt("level", player.level)
-            val savedMoneySpent = sharedPref.getInt("moneyspent", player.moneySpent)
-            val savedMoneyEarned = sharedPref.getInt("moneyearned",player.moneyEarned)
-            val savedPurchases = sharedPref.getInt("numberofpurchases",player.numberOfPurchases)
-            val savedTotalClicks = sharedPref.getInt("totalclicks",player.totalClicks)
-            val savedMultiplier = sharedPref.getInt("multiplier", player.multiplier)
-            val savedClickValue = sharedPref.getInt("clickvalue", player.clickValue)
-            val savedMultiplierPrice = sharedPref.getInt("multiplierprice", multiplier2.price)
-            val savedCreditLimit = sharedPref.getInt("creditlimit", player.creditLimit)
-            val savedXp = sharedPref.getInt("xp", player.xp)
-            player.money = savedMoney
-            player.credit = savedCredit
-            player.level = savedLevel
-            player.moneySpent = savedMoneySpent
-            player.moneyEarned = savedMoneyEarned
-            player.numberOfPurchases = savedPurchases
-            player.totalClicks = savedTotalClicks
-            multiplier2.price = savedMultiplierPrice
-            player.creditLimit = savedCreditLimit
-            player.xp = savedXp
-            player.multiplier = savedMultiplier
-            player.clickValue = savedClickValue
+            player.money = sharedPref.getInt("money", player.money)
+            player.credit = sharedPref.getInt("credit", player.credit)
+            player.level = sharedPref.getInt("level", player.level)
+            player.moneySpent = sharedPref.getInt("moneyspent", player.moneySpent)
+            player.moneyEarned = sharedPref.getInt("moneyearned",player.moneyEarned)
+            player.numberOfPurchases = sharedPref.getInt("numberofpurchases",player.numberOfPurchases)
+            player.totalClicks = sharedPref.getInt("totalclicks",player.totalClicks)
+            multiplier2.price = sharedPref.getInt("multiplierprice", multiplier2.price)
+            player.creditLimit = sharedPref.getInt("creditlimit", player.creditLimit)
+            player.xp = sharedPref.getInt("xp", player.xp)
+            player.multiplier = sharedPref.getInt("multiplier", player.multiplier)
+            player.clickValue = sharedPref.getInt("clickvalue", player.clickValue)
         }
 
         fun checkOnLevel() {
